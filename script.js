@@ -7,7 +7,6 @@ const allQuestions = [
   {
     hindi: "नमस्ते",
     romanized: "(Namaste)",
-    type: "translate-to-english",
     prompt: "What does this Hindi word mean in English?",
     correct: "Hello / Greetings",
     choices: ["Goodbye", "Hello / Greetings", "Thank you", "Please"]
@@ -15,7 +14,6 @@ const allQuestions = [
   {
     hindi: "धन्यवाद",
     romanized: "(Dhanyavaad)",
-    type: "translate-to-english",
     prompt: "What does this mean in English?",
     correct: "Thank you",
     choices: ["Sorry", "Welcome", "Thank you", "Yes"]
@@ -23,7 +21,6 @@ const allQuestions = [
   {
     hindi: "हाँ",
     romanized: "(Haan)",
-    type: "translate-to-english",
     prompt: "What does this mean in English?",
     correct: "Yes",
     choices: ["No", "Maybe", "Yes", "Okay"]
@@ -31,7 +28,6 @@ const allQuestions = [
   {
     hindi: "नहीं",
     romanized: "(Nahin)",
-    type: "translate-to-english",
     prompt: "What does this mean in English?",
     correct: "No",
     choices: ["Yes", "No", "Stop", "Go"]
@@ -39,7 +35,6 @@ const allQuestions = [
   {
     hindi: "पानी",
     romanized: "(Paani)",
-    type: "translate-to-english",
     prompt: "What does this Hindi word mean in English?",
     correct: "Water",
     choices: ["Food", "Fire", "Water", "Air"]
@@ -47,7 +42,6 @@ const allQuestions = [
   {
     hindi: "एक",
     romanized: "(Ek)",
-    type: "translate-to-english",
     prompt: "Which number is this?",
     correct: "One (1)",
     choices: ["Two (2)", "Three (3)", "One (1)", "Four (4)"]
@@ -55,7 +49,6 @@ const allQuestions = [
   {
     hindi: "दो",
     romanized: "(Do)",
-    type: "translate-to-english",
     prompt: "Which number is this?",
     correct: "Two (2)",
     choices: ["One (1)", "Two (2)", "Five (5)", "Ten (10)"]
@@ -63,7 +56,6 @@ const allQuestions = [
   {
     hindi: "लाल",
     romanized: "(Laal)",
-    type: "translate-to-english",
     prompt: "What color does this word describe?",
     correct: "Red",
     choices: ["Blue", "Green", "Red", "Yellow"]
@@ -71,7 +63,6 @@ const allQuestions = [
   {
     hindi: "नीला",
     romanized: "(Neela)",
-    type: "translate-to-english",
     prompt: "What color does this word describe?",
     correct: "Blue",
     choices: ["Red", "Blue", "White", "Black"]
@@ -79,7 +70,6 @@ const allQuestions = [
   {
     hindi: "माँ",
     romanized: "(Maa)",
-    type: "translate-to-english",
     prompt: "What family member is this?",
     correct: "Mother",
     choices: ["Father", "Sister", "Mother", "Brother"]
@@ -87,7 +77,6 @@ const allQuestions = [
   {
     hindi: "घर",
     romanized: "(Ghar)",
-    type: "translate-to-english",
     prompt: "What does this word mean in English?",
     correct: "Home / House",
     choices: ["School", "Home / House", "Market", "Garden"]
@@ -95,7 +84,6 @@ const allQuestions = [
   {
     hindi: "खाना",
     romanized: "(Khaana)",
-    type: "translate-to-english",
     prompt: "What does this word mean in English?",
     correct: "Food",
     choices: ["Sleep", "Food", "Play", "Walk"]
@@ -115,11 +103,11 @@ const correctMessages = [
 ];
 
 const wrongMessages = [
-  "Almost! The right answer was **{answer}** — you'll get it next time! 💙",
-  "Not quite, but that's how we learn! It was **{answer}**. Keep going! 😊",
-  "Good try! The answer was **{answer}**. You've got this! 🌱",
-  "Don't worry — it was **{answer}**. Mistakes help us remember! 💡",
-  "So close! The correct answer is **{answer}**. You'll nail it next round! 🎯"
+  "Almost! The right answer was {answer} — you'll get it next time! 💙",
+  "Not quite, but that's how we learn! It was {answer}. Keep going! 😊",
+  "Good try! The answer was {answer}. You've got this! 🌱",
+  "Don't worry — it was {answer}. Mistakes help us remember! 💡",
+  "So close! The correct answer is {answer}. You'll nail it next round! 🎯"
 ];
 
 const streakMessages = {
@@ -173,4 +161,155 @@ function shuffle(array) {
 
 // ---------- START QUIZ ----------
 function startQuiz() {
-  questions = shuffle(allQuestions).
+  questions = shuffle(allQuestions).slice(0, 10);
+  currentIndex = 0;
+  score = 0;
+  streak = 0;
+  bestStreak = 0;
+  answered = false;
+  showScreen('quiz-screen');
+  loadQuestion();
+}
+
+// ---------- LOAD QUESTION ----------
+function loadQuestion() {
+  answered = false;
+  const q = questions[currentIndex];
+
+  // Update progress bar
+  const pct = (currentIndex / questions.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  // Update counters
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('streak-display').textContent = streak;
+  document.getElementById('question-counter').textContent =
+    'Q ' + (currentIndex + 1) + ' / ' + questions.length;
+
+  // Update question card
+  document.getElementById('question-text').textContent = q.hindi;
+  document.getElementById('question-sub').textContent = q.romanized;
+  document.getElementById('tutor-hint').textContent = q.prompt;
+
+  // Hide feedback
+  const fb = document.getElementById('feedback-box');
+  fb.classList.add('hidden');
+  fb.classList.remove('correct-fb', 'wrong-fb');
+
+  // Build choices
+  const container = document.getElementById('choices-container');
+  container.innerHTML = '';
+  const shuffledChoices = shuffle(q.choices);
+  shuffledChoices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice;
+    btn.onclick = () => selectAnswer(choice, btn);
+    container.appendChild(btn);
+  });
+}
+
+// ---------- SELECT ANSWER ----------
+function selectAnswer(choice, btn) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[currentIndex];
+  const isCorrect = choice === q.correct;
+
+  // Disable all buttons and highlight
+  document.querySelectorAll('.choice-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.correct) b.classList.add('correct');
+  });
+
+  if (!isCorrect) {
+    btn.classList.add('wrong');
+  }
+
+  // Update score and streak
+  const fb = document.getElementById('feedback-box');
+  const fbIcon = document.getElementById('feedback-icon');
+  const fbMsg = document.getElementById('feedback-message');
+
+  if (isCorrect) {
+    score++;
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+
+    fb.classList.remove('hidden');
+    fb.classList.add('correct-fb');
+    fbIcon.textContent = '✅';
+
+    // Check for streak milestone first
+    let msg = '';
+    if (streakMessages[streak]) {
+      msg = streakMessages[streak] + '<br>';
+    }
+    const randomCorrect = correctMessages[Math.floor(Math.random() * correctMessages.length)];
+    fbMsg.innerHTML = msg + randomCorrect;
+
+  } else {
+    streak = 0;
+    fb.classList.remove('hidden');
+    fb.classList.add('wrong-fb');
+    fbIcon.textContent = '💙';
+
+    const randomWrong = wrongMessages[Math.floor(Math.random() * wrongMessages.length)];
+    fbMsg.innerHTML = randomWrong.replace('{answer}', '<strong>' + q.correct + '</strong>');
+  }
+
+  // Update displays
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('streak-display').textContent = streak;
+}
+
+// ---------- NEXT QUESTION ----------
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= questions.length) {
+    showResults();
+  } else {
+    loadQuestion();
+  }
+}
+
+// ---------- SHOW RESULTS ----------
+function showResults() {
+  const xpEarned = score * 10 + bestStreak * 5;
+  saveXP(xpEarned);
+
+  document.getElementById('final-score').textContent = score + '/' + questions.length;
+  document.getElementById('final-streak').textContent = bestStreak;
+  document.getElementById('xp-earned').textContent = xpEarned;
+
+  // Pick emoji and title based on score
+  let emoji, title, message;
+  const pct = score / questions.length;
+
+  if (pct === 1) {
+    emoji = '🏆'; title = 'Perfect Score!';
+    message = 'Absolutely amazing! You got every single one right. You are a true Hindi learner! 🌟';
+  } else if (pct >= 0.8) {
+    emoji = '🎉'; title = 'Excellent Work!';
+    message = 'Bahut accha! You did really well. A little more practice and you\'ll be perfect! 💪';
+  } else if (pct >= 0.6) {
+    emoji = '😊'; title = 'Good Job!';
+    message = 'You\'re making great progress! Every lesson brings you closer to fluency. Keep going! 🌱';
+  } else {
+    emoji = '💙'; title = 'Keep Practicing!';
+    message = 'Don\'t worry — learning takes time and you\'re doing great just by trying! Play again to improve! 🚀';
+  }
+
+  document.getElementById('results-emoji').textContent = emoji;
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-message').textContent = message;
+
+  showScreen('results-screen');
+}
+
+// ---------- INIT ----------
+window.onload = function() {
+  loadXP();
+  showScreen('home-screen');
+};
