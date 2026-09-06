@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hindi Seekho 🇮🇳</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HOME SCREEN -->
+  <div id="home-screen" class="screen active">
+    <div class="hero">
+      <h1>🇮🇳 Hindi Seekho</h1>
+      <p class="tagline">Learn Hindi, one word at a time!</p>
+      <div class="xp-banner">
+        ⭐ Total XP: <span id="total-xp">0</span>
+        &nbsp;|&nbsp;
+        📚 Lessons Done: <span id="lessons-done">0</span>
+      </div>
+    </div>
+
+    <div class="lesson-cards">
+      <div class="lesson-card" onclick="startLesson('greetings')">
+        <span class="lesson-icon">👋</span>
+        <h3>Greetings</h3>
+        <p>Namaste & basics</p>
+      </div>
+      <div class="lesson-card" onclick="startLesson('numbers')">
+        <span class="lesson-icon">🔢</span>
+        <h3>Numbers</h3>
+        <p>1 through 10</p>
+      </div>
+      <div class="lesson-card" onclick="startLesson('colors')">
+        <span class="lesson-icon">🎨</span>
+        <h3>Colors</h3>
+        <p>Rango ki duniya</p>
+      </div>
+      <div class="lesson-card" onclick="startLesson('food')">
+        <span class="lesson-icon">🍛</span>
+        <h3>Food</h3>
+        <p>Everyday food words</p>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="startLesson('mixed')">
+      🎲 Mixed Practice
+    </button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quiz-screen" class="screen">
+    <div class="quiz-header">
+      <button class="btn-back" onclick="goHome()">← Home</button>
+      <div class="stats-bar">
+        <span>❤️ Score: <b id="current-score">0</b></span>
+        <span>🔥 Streak: <b id="current-streak">0</b></span>
+        <span>📍 <b id="question-counter">1/10</b></span>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div class="question-box">
+      <p class="question-type" id="question-type-label">Translate this word:</p>
+      <div class="hindi-word" id="hindi-display"></div>
+      <p class="question-prompt" id="question-prompt"></p>
+    </div>
+
+    <!-- MULTIPLE CHOICE -->
+    <div id="mc-section" class="answer-section">
+      <div class="choices" id="choices-container"></div>
+    </div>
+
+    <!-- TYPE ANSWER -->
+    <div id="type-section" class="answer-section hidden">
+      <input type="text" id="type-input" placeholder="Type your answer here..." 
+             onkeydown="if(event.key==='Enter') checkTypedAnswer()" />
+      <button class="btn-primary" onclick="checkTypedAnswer()">Check ✓</button>
+    </div>
+
+    <!-- FEEDBACK BOX -->
+    <div id="feedback-box" class="feedback-box hidden">
+      <p id="feedback-text"></p>
+      <button class="btn-next" onclick="nextQuestion()">Next →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="results-screen" class="screen">
+    <div class="results-container">
+      <h2 id="results-title">🎉 Lesson Complete!</h2>
+      <div class="results-stats">
+        <div class="stat-box">
+          <span class="stat-num" id="final-score">0</span>
+          <span class="stat-label">Score</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="final-xp">0</span>
+          <span class="stat-label">XP Earned</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="final-streak">0</span>
+          <span class="stat-label">Best Streak</span>
+        </div>
+      </div>
+      <p id="results-message" class="results-message"></p>
+      <button class="btn-primary" onclick="goHome()">🏠 Home</button>
+      <button class="btn-secondary" onclick="restartLesson()">🔄 Try Again</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
